@@ -1,0 +1,101 @@
+application {
+  config {
+    applicationType monolith
+    authenticationType jwt
+    baseName backendRodri
+    buildTool maven
+    cacheProvider ehcache
+    clientFramework react
+    clientTheme none
+    creationTimestamp 1732734738921
+    databaseType sql
+    devDatabaseType h2Disk
+    enableHibernateCache true
+    enableSwaggerCodegen false
+    enableTranslation true
+    jhipsterVersion "8.6.0"
+    jwtSecretKey "MzgwMDBlYWIyNjU4MDQxMjk5MGVjYTNlMWIyMjdkMDlkN2FlNWRiMDVhMDBkY2NlNjc1OTk0NjAyMGUxNTYzNDczNGI5YzZkNzg3NDAyMTBiMjQzYThhMDJmNDA1YTI0ZmY3Y2IwYWI0NWMxNDE0OWU3NDQ5OWM5ZWExZjlkM2Q="
+    languages [es]
+    messageBroker false
+    microfrontends []
+    nativeLanguage es
+    packageName com.mycompany.myapp
+    prodDatabaseType mysql
+    reactive false
+    searchEngine false
+    serviceDiscoveryType false
+    testFrameworks []
+    websocket false
+    withAdminUi true
+  }
+
+  entities Adicional, Caracteristica, Dispositivo, Opcion, Personalizacion, Venta
+}
+
+@ChangelogDate("20241127194922")
+entity Adicional {
+  nombre String
+  descripcion String
+  precio BigDecimal
+  precioGratis BigDecimal
+  idCatedra Long
+}
+@ChangelogDate("20241127194728")
+entity Caracteristica {
+  nombre String
+  descripcion String
+  idCatedra Long
+}
+@ChangelogDate("20241127192510")
+entity Dispositivo {
+  codigo String
+  nombre String
+  descripcion String
+  precioBase BigDecimal
+  moneda Moneda
+  idCatedra Long
+}
+@ChangelogDate("20241127195307")
+entity Opcion {
+  codigo String
+  nombre String
+  descripcion String
+  precioAdicional BigDecimal
+  idCatedra Long
+}
+@ChangelogDate("20241127195108")
+entity Personalizacion {
+  nombre String
+  descripcion String
+  idCatedra Long
+}
+@ChangelogDate("20241127195452")
+entity Venta {
+  fechaVenta ZonedDateTime
+  precioFinal BigDecimal
+}
+
+enum Moneda {
+  ARS,
+  USD,
+  BRL,
+  EUR
+}
+
+relationship OneToMany {
+  Dispositivo{adicional} to Adicional
+  Dispositivo{caracteristica} to Caracteristica
+  Dispositivo{personalizacion} to Personalizacion
+  Personalizacion{opcion} to Opcion
+}
+relationship ManyToOne {
+  Venta{dispositivo required} to Dispositivo
+}
+relationship ManyToMany {
+  Venta{adicional} to Adicional
+  Venta{personalizacion} to Personalizacion
+}
+
+dto Adicional, Caracteristica, Dispositivo, Opcion, Personalizacion, Venta with mapstruct
+service Adicional, Caracteristica, Dispositivo, Opcion, Personalizacion, Venta with serviceImpl
+search Adicional, Caracteristica, Dispositivo, Opcion, Personalizacion, Venta with no

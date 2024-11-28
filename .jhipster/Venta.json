@@ -1,0 +1,48 @@
+{
+  "annotations": {
+    "changelogDate": "20241127195452"
+  },
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "fechaVenta",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "precioFinal",
+      "fieldType": "BigDecimal"
+    }
+  ],
+  "jpaMetamodelFiltering": false,
+  "name": "Venta",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "dispositivo",
+      "relationshipName": "dispositivo",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": ["required"]
+    },
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "adicional",
+      "otherEntityRelationshipName": "venta",
+      "relationshipName": "adicional",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-many"
+    },
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "personalizacion",
+      "otherEntityRelationshipName": "venta",
+      "relationshipName": "personalizacion",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-many"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

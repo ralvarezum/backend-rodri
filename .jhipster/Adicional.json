@@ -1,0 +1,35 @@
+{
+  "annotations": {
+    "changelogDate": "20241127194922"
+  },
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "nombre",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "descripcion",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "precio",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "precioGratis",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "idCatedra",
+      "fieldType": "Long"
+    }
+  ],
+  "jpaMetamodelFiltering": false,
+  "name": "Adicional",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

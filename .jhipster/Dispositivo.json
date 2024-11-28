@@ -1,0 +1,65 @@
+{
+  "annotations": {
+    "changelogDate": "20241127192510"
+  },
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "codigo",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "nombre",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "descripcion",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "precioBase",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "moneda",
+      "fieldType": "Moneda",
+      "fieldValues": "ARS,USD,BRL,EUR"
+    },
+    {
+      "fieldName": "idCatedra",
+      "fieldType": "Long"
+    }
+  ],
+  "jpaMetamodelFiltering": false,
+  "name": "Dispositivo",
+  "pagination": "no",
+  "readOnly": false,
+  "relationships": [
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "adicional",
+      "otherEntityRelationshipName": "dispositivo",
+      "relationshipName": "adicional",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "caracteristica",
+      "otherEntityRelationshipName": "dispositivo",
+      "relationshipName": "caracteristica",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "personalizacion",
+      "otherEntityRelationshipName": "dispositivo",
+      "relationshipName": "personalizacion",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}
