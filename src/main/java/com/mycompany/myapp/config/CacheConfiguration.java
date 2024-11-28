@@ -51,20 +51,19 @@ public class CacheConfiguration {
             createCache(cm, com.mycompany.myapp.domain.Authority.class.getName());
             createCache(cm, com.mycompany.myapp.domain.User.class.getName() + ".authorities");
             createCache(cm, com.mycompany.myapp.domain.Dispositivo.class.getName());
-            createCache(cm, com.mycompany.myapp.domain.Caracteristica.class.getName());
-            createCache(cm, com.mycompany.myapp.domain.Adicional.class.getName());
-            createCache(cm, com.mycompany.myapp.domain.Personalizacion.class.getName());
-            createCache(cm, com.mycompany.myapp.domain.Opcion.class.getName());
-            createCache(cm, com.mycompany.myapp.domain.Venta.class.getName());
             createCache(cm, com.mycompany.myapp.domain.Dispositivo.class.getName() + ".adicionals");
             createCache(cm, com.mycompany.myapp.domain.Dispositivo.class.getName() + ".caracteristicas");
             createCache(cm, com.mycompany.myapp.domain.Dispositivo.class.getName() + ".personalizacions");
-            createCache(cm, com.mycompany.myapp.domain.Personalizacion.class.getName() + ".opcions");
+            createCache(cm, com.mycompany.myapp.domain.Caracteristica.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Adicional.class.getName());
             createCache(cm, com.mycompany.myapp.domain.Adicional.class.getName() + ".ventas");
+            createCache(cm, com.mycompany.myapp.domain.Personalizacion.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Personalizacion.class.getName() + ".opcions");
             createCache(cm, com.mycompany.myapp.domain.Personalizacion.class.getName() + ".ventas");
+            createCache(cm, com.mycompany.myapp.domain.Opcion.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Venta.class.getName());
             createCache(cm, com.mycompany.myapp.domain.Venta.class.getName() + ".adicionals");
             createCache(cm, com.mycompany.myapp.domain.Venta.class.getName() + ".personalizacions");
-            createCache(cm, com.mycompany.myapp.domain.Dispositivo.class.getName() + ".opcions");
             // jhipster-needle-ehcache-add-entry
         };
     }

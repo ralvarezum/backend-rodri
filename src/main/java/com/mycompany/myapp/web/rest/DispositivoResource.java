@@ -44,9 +44,7 @@ public class DispositivoResource {
      * {@code POST  /dispositivos} : Create a new dispositivo.
      *
      * @param dispositivoDTO the dispositivoDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with
-     *         body the new dispositivoDTO, or with status {@code 400 (Bad Request)}
-     *         if the dispositivo has already an ID.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new dispositivoDTO, or with status {@code 400 (Bad Request)} if the dispositivo has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
@@ -64,14 +62,11 @@ public class DispositivoResource {
     /**
      * {@code PUT  /dispositivos/:id} : Updates an existing dispositivo.
      *
-     * @param id             the id of the dispositivoDTO to save.
+     * @param id the id of the dispositivoDTO to save.
      * @param dispositivoDTO the dispositivoDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body
-     *         the updated dispositivoDTO,
-     *         or with status {@code 400 (Bad Request)} if the dispositivoDTO is not
-     *         valid,
-     *         or with status {@code 500 (Internal Server Error)} if the
-     *         dispositivoDTO couldn't be updated.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated dispositivoDTO,
+     * or with status {@code 400 (Bad Request)} if the dispositivoDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the dispositivoDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
@@ -98,19 +93,14 @@ public class DispositivoResource {
     }
 
     /**
-     * {@code PATCH  /dispositivos/:id} : Partial updates given fields of an
-     * existing dispositivo, field will ignore if it is null
+     * {@code PATCH  /dispositivos/:id} : Partial updates given fields of an existing dispositivo, field will ignore if it is null
      *
-     * @param id             the id of the dispositivoDTO to save.
+     * @param id the id of the dispositivoDTO to save.
      * @param dispositivoDTO the dispositivoDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body
-     *         the updated dispositivoDTO,
-     *         or with status {@code 400 (Bad Request)} if the dispositivoDTO is not
-     *         valid,
-     *         or with status {@code 404 (Not Found)} if the dispositivoDTO is not
-     *         found,
-     *         or with status {@code 500 (Internal Server Error)} if the
-     *         dispositivoDTO couldn't be updated.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated dispositivoDTO,
+     * or with status {@code 400 (Bad Request)} if the dispositivoDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the dispositivoDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the dispositivoDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
@@ -141,8 +131,7 @@ public class DispositivoResource {
     /**
      * {@code GET  /dispositivos} : get all the dispositivos.
      *
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list
-     *         of dispositivos in body.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of dispositivos in body.
      */
     @GetMapping("")
     public List<DispositivoDTO> getAllDispositivos() {
@@ -154,8 +143,7 @@ public class DispositivoResource {
      * {@code GET  /dispositivos/:id} : get the "id" dispositivo.
      *
      * @param id the id of the dispositivoDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body
-     *         the dispositivoDTO, or with status {@code 404 (Not Found)}.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the dispositivoDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
     public ResponseEntity<DispositivoDTO> getDispositivo(@PathVariable("id") Long id) {

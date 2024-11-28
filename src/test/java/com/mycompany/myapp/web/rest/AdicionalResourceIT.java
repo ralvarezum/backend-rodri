@@ -315,7 +315,7 @@ class AdicionalResourceIT {
         Adicional partialUpdatedAdicional = new Adicional();
         partialUpdatedAdicional.setId(adicional.getId());
 
-        partialUpdatedAdicional.nombre(UPDATED_NOMBRE).descripcion(UPDATED_DESCRIPCION).precioGratis(UPDATED_PRECIO_GRATIS);
+        partialUpdatedAdicional.descripcion(UPDATED_DESCRIPCION).precioGratis(UPDATED_PRECIO_GRATIS).idCatedra(UPDATED_ID_CATEDRA);
 
         restAdicionalMockMvc
             .perform(

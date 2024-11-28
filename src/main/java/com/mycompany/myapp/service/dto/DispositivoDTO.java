@@ -3,7 +3,6 @@ package com.mycompany.myapp.service.dto;
 import com.mycompany.myapp.domain.enumeration.Moneda;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,12 +24,6 @@ public class DispositivoDTO implements Serializable {
     private Moneda moneda;
 
     private Long idCatedra;
-
-    private List<CaracteristicaDTO> caracteristicas;
-
-    private List<PersonalizacionDTO> personalizaciones;
-
-    private List<AdicionalDTO> adicionales;
 
     public Long getId() {
         return id;
@@ -88,30 +81,6 @@ public class DispositivoDTO implements Serializable {
         this.idCatedra = idCatedra;
     }
 
-    public List<CaracteristicaDTO> getCaracteristicas() {
-        return caracteristicas;
-    }
-
-    public void setCaracteristicas(List<CaracteristicaDTO> caracteristicas) {
-        this.caracteristicas = caracteristicas;
-    }
-
-    public List<PersonalizacionDTO> getPersonalizaciones() {
-        return personalizaciones;
-    }
-
-    public void setPersonalizaciones(List<PersonalizacionDTO> personalizaciones) {
-        this.personalizaciones = personalizaciones;
-    }
-
-    public List<AdicionalDTO> getAdicionales() {
-        return adicionales;
-    }
-
-    public void setAdicionales(List<AdicionalDTO> adicionales) {
-        this.adicionales = adicionales;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -137,13 +106,13 @@ public class DispositivoDTO implements Serializable {
     @Override
     public String toString() {
         return "DispositivoDTO{" +
-                "id=" + getId() +
-                ", codigo='" + getCodigo() + "'" +
-                ", nombre='" + getNombre() + "'" +
-                ", descripcion='" + getDescripcion() + "'" +
-                ", precioBase=" + getPrecioBase() +
-                ", moneda='" + getMoneda() + "'" +
-                ", idCatedra=" + getIdCatedra() +
-                "}";
+            "id=" + getId() +
+            ", codigo='" + getCodigo() + "'" +
+            ", nombre='" + getNombre() + "'" +
+            ", descripcion='" + getDescripcion() + "'" +
+            ", precioBase=" + getPrecioBase() +
+            ", moneda='" + getMoneda() + "'" +
+            ", idCatedra=" + getIdCatedra() +
+            "}";
     }
 }

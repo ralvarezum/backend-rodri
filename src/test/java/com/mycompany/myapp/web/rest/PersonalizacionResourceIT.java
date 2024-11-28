@@ -294,6 +294,8 @@ class PersonalizacionResourceIT {
         Personalizacion partialUpdatedPersonalizacion = new Personalizacion();
         partialUpdatedPersonalizacion.setId(personalizacion.getId());
 
+        partialUpdatedPersonalizacion.descripcion(UPDATED_DESCRIPCION).idCatedra(UPDATED_ID_CATEDRA);
+
         restPersonalizacionMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedPersonalizacion.getId())

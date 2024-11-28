@@ -7,8 +7,7 @@ import com.mycompany.myapp.service.dto.DispositivoDTO;
 import org.mapstruct.*;
 
 /**
- * Mapper for the entity {@link Caracteristica} and its DTO
- * {@link CaracteristicaDTO}.
+ * Mapper for the entity {@link Caracteristica} and its DTO {@link CaracteristicaDTO}.
  */
 @Mapper(componentModel = "spring")
 public interface CaracteristicaMapper extends EntityMapper<CaracteristicaDTO, Caracteristica> {
