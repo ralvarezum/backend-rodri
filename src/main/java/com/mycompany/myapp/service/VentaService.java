@@ -63,4 +63,6 @@ public interface VentaService {
      * @param id the id of the entity.
      */
     void delete(Long id);
+
+    List<VentaDTO> fetchVentas();
 }

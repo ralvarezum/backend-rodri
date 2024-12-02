@@ -2,6 +2,7 @@ package com.mycompany.myapp.service.dto;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -21,7 +22,17 @@ public class PersonalizacionDTO implements Serializable {
 
     private DispositivoDTO dispositivo;
 
+    private List<OpcionDTO> opciones;
+
     private Set<VentaDTO> ventas = new HashSet<>();
+
+    public List<OpcionDTO> getOpciones() {
+        return opciones;
+    }
+
+    public void setOpciones(List<OpcionDTO> opciones) {
+        this.opciones = opciones;
+    }
 
     public Long getId() {
         return id;

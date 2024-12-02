@@ -33,7 +33,7 @@ public class Personalizacion implements Serializable {
     @Column(name = "id_catedra")
     private Long idCatedra;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "personalizacion")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "personalizacion", cascade = CascadeType.ALL, orphanRemoval = true)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonIgnoreProperties(value = { "personalizacion" }, allowSetters = true)
     private Set<Opcion> opcions = new HashSet<>();

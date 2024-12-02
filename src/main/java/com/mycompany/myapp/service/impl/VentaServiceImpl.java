@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Service Implementation for managing {@link com.mycompany.myapp.domain.Venta}.
@@ -29,9 +30,15 @@ public class VentaServiceImpl implements VentaService {
 
     private final VentaMapper ventaMapper;
 
-    public VentaServiceImpl(VentaRepository ventaRepository, VentaMapper ventaMapper) {
+    private final WebClient webClient;
+
+    private final String jwtToken =
+        "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb2RyaWFsdmEiLCJleHAiOjE3NDEzNzk5MDMsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MzI3Mzk5MDN9.T3pVYff40aEQSlf7MRP1p9giUEN3Nx19HMIwKI5gQ9DHGtsneMQg2QDMCAFIwObHvFGAeCcQFd4houIDejjRLQ";
+
+    public VentaServiceImpl(VentaRepository ventaRepository, VentaMapper ventaMapper, WebClient.Builder webClientBuilder) {
         this.ventaRepository = ventaRepository;
         this.ventaMapper = ventaMapper;
+        this.webClient = webClientBuilder.baseUrl("http://192.168.194.254:8080/api/catedra").build();
     }
 
     @Override
@@ -87,5 +94,35 @@ public class VentaServiceImpl implements VentaService {
     public void delete(Long id) {
         log.debug("Request to delete Venta : {}", id);
         ventaRepository.deleteById(id);
+    }
+
+    @Override
+    public List<VentaDTO> fetchVentas() {
+        log.debug("Request to synchronize Ventas with external service");
+
+        // Consumir el endpoint
+        List<VentaDTO> VentasExternas = webClient
+            .get()
+            .uri("/ventas")
+            .header("Authorization", "Bearer " + jwtToken)
+            .retrieve()
+            .bodyToFlux(VentaDTO.class)
+            .collectList()
+            .block();
+
+        if (VentasExternas == null || VentasExternas.isEmpty()) {
+            log.warn("No ventas received from external service");
+            return List.of();
+        }
+
+        // Actualizar o guardar los ventas en la base de datos
+        List<Venta> ventasActualizadas = VentasExternas.stream()
+            .map(ventaMapper::toEntity)
+            .map(ventaRepository::save)
+            .collect(Collectors.toList());
+
+        log.info("Synchronized {} VENTAS from external service", ventasActualizadas.size());
+
+        return ventasActualizadas.stream().map(ventaMapper::toDto).collect(Collectors.toList());
     }
 }

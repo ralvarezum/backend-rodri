@@ -145,7 +145,7 @@ export const VentaUpdate = () => {
                 {dispositivos
                   ? dispositivos.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.id}
+                        {otherEntity.nombre}
                       </option>
                     ))
                   : null}
@@ -165,7 +165,7 @@ export const VentaUpdate = () => {
                 {adicionals
                   ? adicionals.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.id}
+                        {otherEntity.nombre}
                       </option>
                     ))
                   : null}
@@ -182,7 +182,7 @@ export const VentaUpdate = () => {
                 {personalizacions
                   ? personalizacions.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.id}
+                        {otherEntity.nombre}
                       </option>
                     ))
                   : null}

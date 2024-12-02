@@ -160,7 +160,7 @@ export const AdicionalUpdate = () => {
                 {dispositivos
                   ? dispositivos.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
-                        {otherEntity.id}
+                        {otherEntity.nombre}
                       </option>
                     ))
                   : null}
