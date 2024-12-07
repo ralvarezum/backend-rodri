@@ -5,6 +5,7 @@ import com.mycompany.myapp.repository.DispositivoRepository;
 import com.mycompany.myapp.service.DispositivoService;
 import com.mycompany.myapp.service.dto.DispositivoDTO;
 import com.mycompany.myapp.service.mapper.DispositivoMapper;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -100,7 +101,7 @@ public class DispositivoServiceImpl implements DispositivoService {
     public List<DispositivoDTO> fetchDispositivos() {
         log.debug("Request to synchronize Dispositivos with external service");
 
-        // Consumir el endpoint
+        // Consumir el endpoint de la cátedra
         List<DispositivoDTO> dispositivosExternos = webClient
             .get()
             .uri("/dispositivos")
@@ -115,19 +116,33 @@ public class DispositivoServiceImpl implements DispositivoService {
             return List.of();
         }
 
-        // Actualizar o guardar los dispositivos en la base de datos
-        List<Dispositivo> dispositivosActualizados = dispositivosExternos
-            .stream()
-            .map(dispositivoMapper::toEntity)
-            .map(dispositivoRepository::save)
-            .collect(Collectors.toList());
+        List<Dispositivo> dispositivosActualizados = new ArrayList<>();
+
+        for (DispositivoDTO dispositivoExterno : dispositivosExternos) {
+            // Buscar dispositivo por nombre
+            Dispositivo dispositivoExistente = dispositivoRepository.findByNombre(dispositivoExterno.getNombre()).orElse(null);
+
+            if (dispositivoExistente == null) {
+                // Si no existe, agregarlo como nuevo
+                dispositivosActualizados.add(dispositivoMapper.toEntity(dispositivoExterno));
+            } else {
+                // Si existe, verificar si el precio cambió
+                if (!dispositivoExistente.getPrecioBase().equals(dispositivoExterno.getPrecioBase())) {
+                    dispositivoExistente.setPrecioBase(dispositivoExterno.getPrecioBase());
+                    dispositivosActualizados.add(dispositivoExistente);
+                }
+            }
+        }
+
+        // Guardar nuevos y actualizados
+        dispositivoRepository.saveAll(dispositivosActualizados);
 
         log.info("Synchronized {} dispositivos from external service", dispositivosActualizados.size());
 
         return dispositivosActualizados.stream().map(dispositivoMapper::toDto).collect(Collectors.toList());
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 360000)
     public void fetchDispositivosPeriodicamente() {
         log.info("Starting periodic synchronization of dispositivos");
         fetchDispositivos();

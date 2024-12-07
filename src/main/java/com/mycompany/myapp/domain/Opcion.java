@@ -38,7 +38,7 @@ public class Opcion implements Serializable {
     @Column(name = "id_catedra")
     private Long idCatedra;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(value = { "opcions", "dispositivo", "ventas" }, allowSetters = true)
     private Personalizacion personalizacion;
 

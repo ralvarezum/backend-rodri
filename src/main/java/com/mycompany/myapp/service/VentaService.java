@@ -1,6 +1,9 @@
 package com.mycompany.myapp.service;
 
+import com.mycompany.myapp.domain.Venta;
+//import com.mycompany.myapp.domain.Venta;
 import com.mycompany.myapp.service.dto.VentaDTO;
+import com.mycompany.myapp.service.dto.VentaRequest;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -64,5 +67,7 @@ public interface VentaService {
      */
     void delete(Long id);
 
-    List<VentaDTO> fetchVentas();
+    void registrarVentaEnServicioExterno(Venta venta);
+
+    Venta registrarVenta(VentaRequest ventaRequest);
 }

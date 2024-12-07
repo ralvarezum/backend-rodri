@@ -31,7 +31,7 @@ public class Caracteristica implements Serializable {
     @Column(name = "id_catedra")
     private Long idCatedra;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(value = { "adicionals", "caracteristicas", "personalizacions" }, allowSetters = true)
     private Dispositivo dispositivo;
 

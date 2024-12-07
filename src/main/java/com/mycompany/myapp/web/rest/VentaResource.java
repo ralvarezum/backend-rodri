@@ -1,8 +1,11 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.Venta;
 import com.mycompany.myapp.repository.VentaRepository;
 import com.mycompany.myapp.service.VentaService;
 import com.mycompany.myapp.service.dto.VentaDTO;
+import com.mycompany.myapp.service.dto.VentaRequest;
+import com.mycompany.myapp.service.mapper.VentaMapper;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -37,9 +40,12 @@ public class VentaResource {
 
     private final VentaRepository ventaRepository;
 
-    public VentaResource(VentaService ventaService, VentaRepository ventaRepository) {
+    private final VentaMapper ventaMapper;
+
+    public VentaResource(VentaService ventaService, VentaRepository ventaRepository, VentaMapper ventaMapper) {
         this.ventaService = ventaService;
         this.ventaRepository = ventaRepository;
+        this.ventaMapper = ventaMapper;
     }
 
     /**
@@ -168,5 +174,12 @@ public class VentaResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @PostMapping("/registrar-venta")
+    public ResponseEntity<VentaDTO> registrarVenta(@RequestBody VentaRequest ventaRequest) {
+        Venta venta = ventaService.registrarVenta(ventaRequest);
+        VentaDTO ventaDTO = ventaMapper.toDto(venta);
+        return ResponseEntity.ok(ventaDTO);
     }
 }
