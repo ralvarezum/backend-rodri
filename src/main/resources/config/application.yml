@@ -88,6 +88,13 @@ management:
         autotime:
           enabled: true
 
+# VARIABLES EXTERNAL
+
+external:
+  api:
+    base-url: http://192.168.194.254:8080/api/catedra
+    token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb2RyaWFsdmEiLCJleHAiOjE3NDEzNzk5MDMsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MzI3Mzk5MDN9.T3pVYff40aEQSlf7MRP1p9giUEN3Nx19HMIwKI5gQ9DHGtsneMQg2QDMCAFIwObHvFGAeCcQFd4houIDejjRLQ
+
 spring:
   application:
     name: backendRodri

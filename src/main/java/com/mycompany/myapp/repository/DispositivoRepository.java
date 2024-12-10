@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DispositivoRepository extends JpaRepository<Dispositivo, Long> {
     Optional<Dispositivo> findByNombre(String nombre);
+    Optional<Dispositivo> findByIdCatedra(Long idCatedra);
 }

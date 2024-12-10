@@ -1,5 +1,6 @@
 package com.mycompany.myapp.service.impl;
 
+import com.mycompany.myapp.config.ExternalApiConfig;
 import com.mycompany.myapp.domain.Adicional;
 import com.mycompany.myapp.domain.Dispositivo;
 import com.mycompany.myapp.domain.Opcion;
@@ -47,9 +48,6 @@ public class VentaServiceImpl implements VentaService {
     private final VentaMapper ventaMapper;
     private final WebClient webClient;
 
-    private final String jwtToken =
-        "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb2RyaWFsdmEiLCJleHAiOjE3NDEzNzk5MDMsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MzI3Mzk5MDN9.T3pVYff40aEQSlf7MRP1p9giUEN3Nx19HMIwKI5gQ9DHGtsneMQg2QDMCAFIwObHvFGAeCcQFd4houIDejjRLQ";
-
     public VentaServiceImpl(
         VentaRepository ventaRepository,
         AdicionalRepository adicionalRepository,
@@ -57,14 +55,18 @@ public class VentaServiceImpl implements VentaService {
         VentaMapper ventaMapper,
         WebClient.Builder webClientBuilder,
         DispositivoRepository dispositivoRepository,
-        OpcionRepository opcionRepository
+        OpcionRepository opcionRepository,
+        ExternalApiConfig externalApiConfig
     ) {
         this.ventaRepository = ventaRepository;
         this.dispositivoRepository = dispositivoRepository;
         this.adicionalRepository = adicionalRepository;
         this.opcionRepository = opcionRepository;
         this.ventaMapper = ventaMapper;
-        this.webClient = webClientBuilder.baseUrl("http://192.168.194.254:8080/api/catedra").build();
+        this.webClient = webClientBuilder
+            .baseUrl(externalApiConfig.getBaseUrl()) // Usar baseUrl desde la configuración
+            .defaultHeader("Authorization", "Bearer " + externalApiConfig.getToken()) // Usar token desde la configuración
+            .build();
     }
 
     @Override
@@ -138,12 +140,10 @@ public class VentaServiceImpl implements VentaService {
         // 3. Procesar personalizaciones a partir de las opciones enviadas
         if (request.getPersonalizaciones() != null) {
             for (VentaRequest.PersonalizacionRequest personalizacionRequest : request.getPersonalizaciones()) {
-                // Buscar la opción por su ID
                 Opcion opcion = opcionRepository
                     .findById(personalizacionRequest.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Opción no encontrada con ID: " + personalizacionRequest.getId()));
 
-                // Asociar la personalización explícitamente
                 Personalizacion personalizacion = opcion.getPersonalizacion();
                 if (personalizacion == null) {
                     throw new IllegalArgumentException(
@@ -151,14 +151,11 @@ public class VentaServiceImpl implements VentaService {
                     );
                 }
 
-                // Asocia solo la opción seleccionada a la personalización
-                personalizacion.getOpcions().clear();
-                personalizacion.addOpcion(opcion);
+                Personalizacion personalizacionVenta = new Personalizacion();
+                personalizacionVenta.setId(personalizacion.getId());
+                personalizacionVenta.addOpcion(opcion);
 
-                // Asociar la personalización a la venta
-                venta.addPersonalizacion(personalizacion);
-
-                // Sumar el precio adicional de la opción seleccionada
+                venta.addPersonalizacion(personalizacionVenta);
                 precioCalculado = precioCalculado.add(opcion.getPrecioAdicional());
             }
         }
@@ -170,12 +167,23 @@ public class VentaServiceImpl implements VentaService {
                     .findById(adicionalRequest.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Adicional no encontrado con ID: " + adicionalRequest.getId()));
 
-                // Asociar el adicional a la venta
                 venta.addAdicional(adicional);
 
-                // Sumar el precio del adicional
-                precioCalculado = precioCalculado.add(adicionalRequest.getPrecio());
+                if (
+                    adicional.getPrecioGratis() != null &&
+                    adicional.getPrecioGratis().compareTo(BigDecimal.valueOf(-1)) != 0 &&
+                    precioCalculado.compareTo(adicional.getPrecioGratis()) >= 0
+                ) {
+                    continue;
+                }
+
+                precioCalculado = precioCalculado.add(adicional.getPrecio());
             }
+        }
+
+        // **Nueva validación**: Verificar que el precio final no sea negativo
+        if (precioCalculado.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El precio final de la venta no puede ser negativo.");
         }
 
         // 5. Guardar el precio final
@@ -193,14 +201,13 @@ public class VentaServiceImpl implements VentaService {
     @Override
     public void registrarVentaEnServicioExterno(Venta venta) {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("idDispositivo", venta.getDispositivo().getId());
+        requestBody.put("idDispositivo", venta.getDispositivo().getIdCatedra()); // Usar idCatedra
 
         // Construir el objeto de personalizaciones
         List<Map<String, Object>> personalizaciones = venta
             .getPersonalizacions()
             .stream()
             .map(personalizacion -> {
-                // Tomar solo la opción seleccionada
                 Opcion opcionSeleccionada = personalizacion
                     .getOpcions()
                     .stream()
@@ -212,12 +219,11 @@ public class VentaServiceImpl implements VentaService {
                             )
                     );
 
-                // Retornar el mapeo correcto de personalización y opción
                 return Map.<String, Object>of(
                     "id",
-                    opcionSeleccionada.getId(), // ID de la opción seleccionada
+                    opcionSeleccionada.getIdCatedra(), // Usar idCatedra
                     "precio",
-                    opcionSeleccionada.getPrecioAdicional() // Precio de la opción seleccionada
+                    opcionSeleccionada.getPrecioAdicional()
                 );
             })
             .collect(Collectors.toList());
@@ -230,9 +236,9 @@ public class VentaServiceImpl implements VentaService {
             .map(adicional ->
                 Map.<String, Object>of(
                     "id",
-                    adicional.getId(), // ID del adicional
+                    adicional.getIdCatedra(), // Usar idCatedra
                     "precio",
-                    adicional.getPrecio() // Precio del adicional
+                    adicional.getPrecio()
                 ))
             .collect(Collectors.toList());
         requestBody.put("adicionales", adicionales);
@@ -241,16 +247,15 @@ public class VentaServiceImpl implements VentaService {
         requestBody.put("precioFinal", venta.getPrecioFinal());
         requestBody.put("fechaVenta", venta.getFechaVenta().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
-        // Enviar la solicitud al servicio externo
+        // Enviar la solicitud al servicio externo usando el WebClient configurado
         webClient
             .post()
             .uri("/vender")
             .bodyValue(requestBody)
-            .header("Authorization", "Bearer " + jwtToken)
             .retrieve()
             .bodyToMono(String.class)
             .doOnSuccess(response -> log.info("Venta registrada exitosamente en el servicio externo: {}", response))
             .doOnError(error -> log.error("Error al registrar la venta en el servicio externo: {}", error.getMessage()))
-            .subscribe();
+            .block();
     }
 }

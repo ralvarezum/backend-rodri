@@ -1,11 +1,15 @@
 package com.mycompany.myapp.service.impl;
 
+import com.mycompany.myapp.config.ExternalApiConfig;
+import com.mycompany.myapp.domain.Adicional;
+import com.mycompany.myapp.domain.Caracteristica;
 import com.mycompany.myapp.domain.Dispositivo;
+import com.mycompany.myapp.domain.Opcion;
+import com.mycompany.myapp.domain.Personalizacion;
 import com.mycompany.myapp.repository.DispositivoRepository;
 import com.mycompany.myapp.service.DispositivoService;
 import com.mycompany.myapp.service.dto.DispositivoDTO;
 import com.mycompany.myapp.service.mapper.DispositivoMapper;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -17,10 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-/**
- * Service Implementation for managing
- * {@link com.mycompany.myapp.domain.Dispositivo}.
- */
 @Service
 @Transactional
 public class DispositivoServiceImpl implements DispositivoService {
@@ -28,22 +28,25 @@ public class DispositivoServiceImpl implements DispositivoService {
     private static final Logger log = LoggerFactory.getLogger(DispositivoServiceImpl.class);
 
     private final DispositivoRepository dispositivoRepository;
-
     private final DispositivoMapper dispositivoMapper;
-
     private final WebClient webClient;
-
-    private final String jwtToken =
-        "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb2RyaWFsdmEiLCJleHAiOjE3NDEzNzk5MDMsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MzI3Mzk5MDN9.T3pVYff40aEQSlf7MRP1p9giUEN3Nx19HMIwKI5gQ9DHGtsneMQg2QDMCAFIwObHvFGAeCcQFd4houIDejjRLQ";
+    private final ExternalApiConfig externalApiConfig;
 
     public DispositivoServiceImpl(
         DispositivoRepository dispositivoRepository,
         DispositivoMapper dispositivoMapper,
-        WebClient.Builder webClientBuilder
+        WebClient.Builder webClientBuilder,
+        ExternalApiConfig externalApiConfig
     ) {
         this.dispositivoRepository = dispositivoRepository;
         this.dispositivoMapper = dispositivoMapper;
-        this.webClient = webClientBuilder.baseUrl("http://192.168.194.254:8080/api/catedra").build();
+        this.externalApiConfig = externalApiConfig;
+
+        // Configurar WebClient con baseUrl y el token
+        this.webClient = webClientBuilder
+            .baseUrl(externalApiConfig.getBaseUrl())
+            .defaultHeader("Authorization", "Bearer " + externalApiConfig.getToken())
+            .build();
     }
 
     @Override
@@ -70,7 +73,6 @@ public class DispositivoServiceImpl implements DispositivoService {
             .findById(dispositivoDTO.getId())
             .map(existingDispositivo -> {
                 dispositivoMapper.partialUpdate(existingDispositivo, dispositivoDTO);
-
                 return existingDispositivo;
             })
             .map(dispositivoRepository::save)
@@ -101,11 +103,10 @@ public class DispositivoServiceImpl implements DispositivoService {
     public List<DispositivoDTO> fetchDispositivos() {
         log.debug("Request to synchronize Dispositivos with external service");
 
-        // Consumir el endpoint de la cátedra
+        // Obtener dispositivos desde el servicio externo
         List<DispositivoDTO> dispositivosExternos = webClient
             .get()
             .uri("/dispositivos")
-            .header("Authorization", "Bearer " + jwtToken)
             .retrieve()
             .bodyToFlux(DispositivoDTO.class)
             .collectList()
@@ -116,30 +117,94 @@ public class DispositivoServiceImpl implements DispositivoService {
             return List.of();
         }
 
-        List<Dispositivo> dispositivosActualizados = new ArrayList<>();
+        List<Dispositivo> dispositivosActualizados = dispositivosExternos
+            .stream()
+            .map(dto -> {
+                Optional<Dispositivo> dispositivoExistente = dispositivoRepository.findByIdCatedra(dto.getId());
+                Dispositivo dispositivo;
 
-        for (DispositivoDTO dispositivoExterno : dispositivosExternos) {
-            // Buscar dispositivo por nombre
-            Dispositivo dispositivoExistente = dispositivoRepository.findByNombre(dispositivoExterno.getNombre()).orElse(null);
-
-            if (dispositivoExistente == null) {
-                // Si no existe, agregarlo como nuevo
-                dispositivosActualizados.add(dispositivoMapper.toEntity(dispositivoExterno));
-            } else {
-                // Si existe, verificar si el precio cambió
-                if (!dispositivoExistente.getPrecioBase().equals(dispositivoExterno.getPrecioBase())) {
-                    dispositivoExistente.setPrecioBase(dispositivoExterno.getPrecioBase());
-                    dispositivosActualizados.add(dispositivoExistente);
+                if (dispositivoExistente.isPresent()) {
+                    dispositivo = dispositivoExistente.get();
+                    dispositivoMapper.updateEntityFromDto(dto, dispositivo);
+                } else {
+                    dispositivo = dispositivoMapper.toEntity(dto);
+                    dispositivo.setIdCatedra(dto.getId());
                 }
-            }
-        }
 
-        // Guardar nuevos y actualizados
-        dispositivoRepository.saveAll(dispositivosActualizados);
+                // Actualizar características
+                actualizarCaracteristicas(dispositivo, dto);
 
-        log.info("Synchronized {} dispositivos from external service", dispositivosActualizados.size());
+                // Actualizar personalizaciones y opciones
+                actualizarPersonalizaciones(dispositivo, dto);
+
+                // Actualizar adicionales
+                actualizarAdicionales(dispositivo, dto);
+
+                return dispositivoRepository.save(dispositivo);
+            })
+            .collect(Collectors.toList());
+
+        log.info("Synchronized {} dispositivos and related entities from external service", dispositivosActualizados.size());
 
         return dispositivosActualizados.stream().map(dispositivoMapper::toDto).collect(Collectors.toList());
+    }
+
+    private void actualizarCaracteristicas(Dispositivo dispositivo, DispositivoDTO dto) {
+        dispositivo.getCaracteristicas().clear();
+        dto
+            .getCaracteristicas()
+            .forEach(cDTO -> {
+                Caracteristica caracteristica = new Caracteristica();
+                caracteristica.setIdCatedra(cDTO.getId());
+                caracteristica.setNombre(cDTO.getNombre());
+                caracteristica.setDescripcion(cDTO.getDescripcion());
+                caracteristica.setDispositivo(dispositivo);
+                dispositivo.getCaracteristicas().add(caracteristica);
+            });
+    }
+
+    private void actualizarPersonalizaciones(Dispositivo dispositivo, DispositivoDTO dto) {
+        dispositivo.getPersonalizacions().clear();
+        dto
+            .getPersonalizaciones()
+            .forEach(pDTO -> {
+                Personalizacion personalizacion = new Personalizacion();
+                personalizacion.setIdCatedra(pDTO.getId());
+                personalizacion.setNombre(pDTO.getNombre());
+                personalizacion.setDescripcion(pDTO.getDescripcion());
+                personalizacion.setDispositivo(dispositivo);
+
+                pDTO
+                    .getOpciones()
+                    .forEach(oDTO -> {
+                        Opcion opcion = new Opcion();
+                        opcion.setIdCatedra(oDTO.getId());
+                        opcion.setCodigo(oDTO.getCodigo());
+                        opcion.setNombre(oDTO.getNombre());
+                        opcion.setDescripcion(oDTO.getDescripcion());
+                        opcion.setPrecioAdicional(oDTO.getPrecioAdicional());
+                        opcion.setPersonalizacion(personalizacion);
+                        personalizacion.getOpcions().add(opcion);
+                    });
+
+                dispositivo.getPersonalizacions().add(personalizacion);
+            });
+    }
+
+    private void actualizarAdicionales(Dispositivo dispositivo, DispositivoDTO dto) {
+        dispositivo.getAdicionals().clear();
+        dto
+            .getAdicionales()
+            .forEach(aDTO -> {
+                Adicional adicional = new Adicional();
+                adicional.setIdCatedra(aDTO.getId());
+                adicional.setNombre(aDTO.getNombre());
+                adicional.setDescripcion(aDTO.getDescripcion());
+                adicional.setPrecio(aDTO.getPrecio());
+                adicional.setPrecioGratis(aDTO.getPrecioGratis());
+                adicional.setDispositivo(dispositivo);
+                dispositivo.getAdicionals().add(adicional);
+            });
     }
 
     @Scheduled(fixedRate = 360000)

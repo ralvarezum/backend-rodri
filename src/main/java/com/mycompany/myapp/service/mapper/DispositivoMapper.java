@@ -18,4 +18,10 @@ public interface DispositivoMapper extends EntityMapper<DispositivoDTO, Disposit
     @Mapping(source = "personalizaciones", target = "personalizacions")
     @Mapping(source = "adicionales", target = "adicionals")
     Dispositivo toEntity(DispositivoDTO dispositivoDTO);
+
+    /**
+     * Actualiza una entidad existente desde un DTO.
+     */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(DispositivoDTO dispositivoDTO, @MappingTarget Dispositivo dispositivo);
 }

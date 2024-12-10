@@ -38,7 +38,7 @@ public class Venta implements Serializable {
     @JsonIgnoreProperties(value = { "adicionals", "caracteristicas", "personalizacions" }, allowSetters = true)
     private Dispositivo dispositivo;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "rel_venta__adicional",
         joinColumns = @JoinColumn(name = "venta_id"),
@@ -48,7 +48,7 @@ public class Venta implements Serializable {
     @JsonIgnoreProperties(value = { "dispositivo", "ventas" }, allowSetters = true)
     private Set<Adicional> adicionals = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "rel_venta__personalizacion",
         joinColumns = @JoinColumn(name = "venta_id"),
